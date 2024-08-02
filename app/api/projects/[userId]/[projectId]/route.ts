@@ -9,14 +9,14 @@ export const GET = async (req: Request, context: any) => {
 
   const { params } = context;
   console.log(params);
-  const { userId } = params;
+  const { projectId } = params;
 
   await connectDB();
 
   try {
-    const projects = await Project.find({ owner: userId }).exec();
+    const project = await Project.findById(projectId).exec();
 
-    return NextResponse.json(projects);
+    return NextResponse.json(project);
   } catch (error) {
     console.log({ error });
     NextResponse.json({ success: false, error: (error as Error).message });

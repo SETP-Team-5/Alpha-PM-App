@@ -12,7 +12,6 @@
   },
   "aliases": {
     "components": "app/components",
-    "utils": "app/lib",
-    "models": "app/models"
+    "utils": "app/lib"
   }
 }

@@ -1,32 +1,99 @@
-"use client";
+import { Navbar } from "@/app/components/Header/header";
+import LogoutButton from "@/app/components/logout/logout";
+import ProjectList from "@/app/components/project-list/project-list";
+import { auth } from "@/lib/auth";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/app/components/ui/card";
 
-export default function Home() {
-  const { data, status } = useSession();
+import { Button } from "./components/ui/button";
 
-  const router = useRouter();
+export const Home = async () => {
+  const session = await auth();
 
+  const data: any = await fetch(
+    "http://localhost:3000/api/projects/66a5e814a17ecb1d7b535051"
+    // { next: { revalidate: 3600 } }
+  );
+
+  const projects = await data.json();
+
+  const formatDate = (date: Date) => {
+    var d = new Date(date),
+      month = "" + (d.getMonth() + 1),
+      day = "" + d.getDate(),
+      year = d.getFullYear();
+
+    if (month.length < 2) month = "0" + month;
+    if (day.length < 2) day = "0" + day;
+
+    return [year, month, day].join("/");
+  };
+
+  // console.log(posts);
   const showSession = () => {
-    if (status === "authenticated") {
+    if (session) {
       return (
         <>
-          <h1>Welcome {data.user?.name}</h1>
-          <button
-            className="border border-solid border-black rounded"
-            onClick={() => {
-              signOut({ redirect: false }).then(() => {
-                router.push("/");
-              });
-            }}
-          >
-            Sign Out
-          </button>
+          <div className="prose lg:prose:xl">
+            <div className="pb-3">
+              <h1 className="w-full text-xl py-1">
+                Welcome, {session.user?.name}
+              </h1>
+
+              {projects.length === 0 ? (
+                <p className="w-full text-sm flex">
+                  Please{" "}
+                  <Link href="/project/create" className="px-1 underline">
+                    create
+                  </Link>{" "}
+                  a project to begin.
+                </p>
+              ) : (
+                <p className="w-full text-sm">
+                  Please select a project to view details
+                </p>
+              )}
+            </div>
+
+            {projects.length ? (
+              <div className="grid grid-cols-3 gap-5 w-full">
+                {projects.map((project: any) => {
+                  return (
+                    <Link href={`/project/${project._id}`}>
+                      <Card className="h-full">
+                        <CardHeader>
+                          <CardTitle>{project.title}</CardTitle>
+                          <CardDescription>
+                            {project.description}
+                          </CardDescription>
+                        </CardHeader>
+                        {/* <CardContent>
+                          <p>Card Content</p>
+                        </CardContent> */}
+                        <CardFooter>
+                          <p className="text-xs text-gray-400">
+                            {formatDate(project.startDate)} -{" "}
+                            {formatDate(project.endDate)}
+                          </p>
+                        </CardFooter>
+                      </Card>
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
         </>
       );
-    } else if (status === "loading") {
-      return <span className="text-[#888] text-sm mt-7">Loading...</span>;
     } else {
       return (
         <Link
@@ -39,9 +106,14 @@ export default function Home() {
     }
   };
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center">
-      <h1 className="text-xl">Home</h1>
-      {showSession()}
+    <main className="min-h-screen flex flex-col w-full h-full items-center">
+      <Navbar username={session?.user?.name || ""}></Navbar>
+
+      <div className="flex max-w-4xl items-center flex-col">
+        {showSession()}
+      </div>
     </main>
   );
-}
+};
+
+export default Home;

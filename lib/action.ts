@@ -2,33 +2,35 @@
 
 import { revalidatePath } from "next/cache";
 
-import { connectDB } from "./mongodb";
+import { connectDB } from "./utils";
 import Project, { ProjectDocument } from "../models/Project";
 import { useSession } from "next-auth/react";
-import { authOptions } from "./auth";
+import { auth } from "./auth";
 import { getServerSession } from "next-auth";
 import { FormEvent } from "react";
 
 export const createProject = async (formData: {
   title: string;
-  desc: string;
+  description: string;
   startDate: Date;
   endDate: Date;
   userId: string;
   members: string[];
 }) => {
-  // const session = await getServerSession(authOptions);
+  const session = await auth();
 
-  const { title, desc, startDate, endDate, userId, members } = formData;
+  const { title, description, startDate, endDate, userId, members } = formData;
 
   const createdAt = new Date();
   const updatedAt = new Date();
+
+  console.log(description);
 
   try {
     connectDB();
     const newProject = new Project({
       title,
-      desc,
+      description,
       startDate,
       endDate,
       createdAt,
