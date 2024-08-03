@@ -96,12 +96,17 @@ export const Home = async () => {
       );
     } else {
       return (
-        <Link
-          href="/login"
-          className="border border-solid border-black rounded"
-        >
-          Sign In
-        </Link>
+        <div>
+          <h1 className="text-lg py-4">Please sign in to continue</h1>
+          <div className="grid grid-cols-2 gap-2">
+            <Link href="/login">
+              <Button className="w-full">Sign In</Button>
+            </Link>
+            <Link href="/register">
+              <Button className="w-full">Register</Button>
+            </Link>
+          </div>
+        </div>
       );
     }
   };

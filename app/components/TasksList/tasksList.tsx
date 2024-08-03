@@ -144,7 +144,9 @@ export const columns: ColumnDef<Task>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("progress")} %</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.getValue("progress")} %</div>
+    ),
   },
   {
     accessorKey: "assignedUserName",
@@ -159,7 +161,7 @@ export const columns: ColumnDef<Task>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("assignedUserName")} %</div>,
+    cell: ({ row }) => <div>{row.getValue("assignedUserName")}</div>,
   },
   {
     accessorKey: "status",
