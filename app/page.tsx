@@ -44,7 +44,7 @@ export const Home = async () => {
       return (
         <>
           <div className="prose lg:prose:xl">
-            <div className="pb-3">
+            <div className="pb-3 pt-20">
               <h1 className="w-full text-xl py-1">
                 Welcome, {session.user?.name}
               </h1>
