@@ -38,31 +38,37 @@ import {
 import { formatDate } from "@/lib/utils";
 import { UserDocument } from "@/models/User";
 
-export interface Task {
-  id: string;
-  title: string;
-  description: string;
-  progress: number;
-  status:
-    | "In Progress"
-    | "Completed"
-    | "Paused"
-    | "Inactive"
-    | "Assigned"
-    | "Not started";
-  assignedUserId: string;
-  assignedUserName: string;
+const data: UserDocument[] = [];
+
+export const columns: ColumnDef<UserDocument>[] = [
+  {
+    accessorKey: "name",
+    header: "Name",
+    cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
+  },
+  {
+    accessorKey: "email",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          // onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Email
+          {/* <ArrowUpDown className="ml-2 h-4 w-4" /> */}
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div>{row.getValue("email")}</div>,
+  },
+];
+
+interface Props {
   members: UserDocument[];
 }
 
-interface Props {
-  tasks: any;
-  updateTask: any;
-}
-
-export function TasksList(props: Props) {
-  const data = props.tasks;
-
+export function MembersList(props: Props) {
+  const data = props.members;
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -71,138 +77,7 @@ export function TasksList(props: Props) {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  const columns: ColumnDef<Task>[] = [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
-      accessorKey: "title",
-      header: "Title",
-      cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("title")}</div>
-      ),
-    },
-    {
-      accessorKey: "description",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            // onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Description
-            {/* <ArrowUpDown className="ml-2 h-4 w-4" /> */}
-          </Button>
-        );
-      },
-      cell: ({ row }) => <div>{row.getValue("description")}</div>,
-    },
-
-    {
-      accessorKey: "startDate",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Start Date
-            {/* <ArrowUpDown className="ml-2 h-4 w-4" /> */}
-          </Button>
-        );
-      },
-      cell: ({ row }) => <div>{formatDate(row.getValue("startDate"))}</div>,
-    },
-    {
-      accessorKey: "endDate",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            End Date
-            {/* <ArrowUpDown className="ml-2 h-4 w-4" /> */}
-          </Button>
-        );
-      },
-      cell: ({ row }) => <div>{formatDate(row.getValue("endDate"))}</div>,
-    },
-    {
-      accessorKey: "progress",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            // onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Progress
-            {/* <ArrowUpDown className="ml-2 h-4 w-4" /> */}
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="text-center">{row.getValue("progress")} %</div>
-      ),
-    },
-    {
-      accessorKey: "assignedUserName",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            // onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Assigned to
-            {/* <ArrowUpDown className="ml-2 h-4 w-4" /> */}
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="text-center">
-          {row.getValue("assignedUserName") || "Not Assigned"}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "status",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            // onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Status
-            {/* <ArrowUpDown className="ml-2 h-4 w-4" /> */}
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="text-center">
-          {row.getValue("status") || "Not Started"}{" "}
-        </div>
-      ),
-    },
-  ];
+  console.log({ data });
 
   const table = useReactTable({
     data,
@@ -286,15 +161,15 @@ export function TasksList(props: Props) {
         </div>
       ) : (
         <div
-          className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-full w-full"
+          className="flex items-center h-full w-full justify-center rounded-lg border border-dashed shadow-sm"
           x-chunk="dashboard-02-chunk-1"
         >
           <div className="flex flex-col items-center gap-1 text-center">
             <h3 className="text-2xl font-bold tracking-tight">
-              Project have no tasks
+              Project have no members
             </h3>
             <p className="text-sm text-muted-foreground">
-              Kickstart by creating a new task.
+              Kickstart by adding a member.
             </p>
           </div>
         </div>

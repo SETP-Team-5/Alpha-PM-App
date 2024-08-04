@@ -8,7 +8,7 @@ export const GET = async (req: Request, context: any) => {
   const { method } = req;
 
   const { params } = context;
-  console.log(params);
+
   const { userId } = params;
 
   await connectDB();
@@ -22,10 +22,3 @@ export const GET = async (req: Request, context: any) => {
     NextResponse.json({ success: false, error: (error as Error).message });
   }
 };
-// Handles GET requests to /api
-// export async function GET(request: Request) {
-//   return new Response("Hello, Next.js!", {
-//     status: 200,
-//     headers: { referer: "hellooooo" },
-//   });
-// }

@@ -1,22 +1,16 @@
-import Project from "@/models/Project";
+import User from "@/models/User";
 import { connectDB } from "@/lib/utils";
 import { getProjects } from "@/lib/data";
 import { NextApiRequest, NextApiResponse } from "next";
 import { NextResponse } from "next/server";
 
 export const GET = async (req: Request, context: any) => {
-  const { method } = req;
-
-  const { params } = context;
-
-  const { userId } = params;
-
   await connectDB();
 
   try {
-    const projects = await Project.find({ owner: userId }).exec();
+    const users = await User.find().exec();
 
-    return NextResponse.json(projects);
+    return NextResponse.json(users);
   } catch (error) {
     console.log({ error });
     NextResponse.json({ success: false, error: (error as Error).message });

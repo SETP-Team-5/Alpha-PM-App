@@ -47,7 +47,7 @@ const formSchema = z.object({
 
 interface Props {
   projectId: string;
-  onProjectCreated: any;
+  onTaskCreated: any;
 }
 
 const CreateTask = (props: Props) => {
@@ -86,7 +86,7 @@ const CreateTask = (props: Props) => {
       .then((res) => res.json())
       .then((data: any) => {
         console.log("successfully created task", data);
-        props.onProjectCreated(data);
+        props.onTaskCreated(data);
         // setProject(data);
         // setLoading(false);
       });

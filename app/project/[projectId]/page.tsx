@@ -6,9 +6,10 @@ import { Button } from "@/app/components/ui/button";
 import { useSession } from "next-auth/react";
 import { redirect, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import createTask from "@/app/components/Task/CreateTask/createTask";
 import CreateTask from "@/app/components/Task/CreateTask/createTask";
-import { TasksList } from "@/app/components/TasksList/tasksList";
+import { Task, TasksList } from "@/app/components/TasksList/tasksList";
 import {
   Card,
   CardHeader,
@@ -16,11 +17,43 @@ import {
   CardDescription,
   CardContent,
 } from "@/app/components/ui/card";
-import { BarChart } from "lucide-react";
+import { BarChart, ChartNoAxesGantt, Info } from "lucide-react";
 import { ChartConfig, ChartContainer } from "@/app/components/ui/chart";
 import { Bar, LabelList, YAxis, XAxis } from "recharts";
 import { TaskDocument } from "@/models/Task";
+
+import { Input } from "@/app/components/ui/input";
 import BreadcrumbNav from "@/app/components/Breadcrumbs/breadcrumbs";
+import { Badge } from "@/app/components/ui/badge";
+
+import { Sheet, SheetContent, SheetTrigger } from "@/app/components/ui/sheet";
+import {
+  Bell,
+  CircleUser,
+  Home,
+  LineChart,
+  ListTodo,
+  LogOut,
+  Menu,
+  Package,
+  Package2,
+  Plus,
+  Search,
+  ShoppingCart,
+  SquareChartGantt,
+  SquarePlus,
+  Users,
+} from "lucide-react";
+import LogoutButton from "@/app/components/logout/logout";
+import { MembersList } from "@/app/components/MembersList/MembersList";
+import AddMember from "@/app/components/Member/AddMember/addMember";
+import { UserDocument } from "@/models/User";
+import { ProjectDocument } from "@/models/Project";
+
+const LINK_STYLE =
+  "flex items-center gap-3 bg-transparent rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-muted w-full justify-start";
+const LINK_STYLE_ACTIVE =
+  "flex items-center gap-3 bg-muted rounded-lg px-3 py-2 text-black transition-all hover:text-primary hover:bg-muted w-full justify-start ";
 
 export const Page = ({ params }: { params: { projectId: string } }) => {
   const { projectId } = params;
@@ -32,17 +65,31 @@ export const Page = ({ params }: { params: { projectId: string } }) => {
     description: "",
   });
   const [tasks, setTasks] = useState([] as any);
+  const [activeTab, setActiveTab] = useState("overview");
   const [isLoading, setLoading] = useState(true);
+  const [showTaskForm, setShowTaskForm] = useState(false);
+  const [showMemberForm, setShowMemberForm] = useState(false);
+  const [members, setMembers] = useState([] as UserDocument[]);
   const [projectProgress, setProjectProgress] = useState(0);
   const [completedTasks, setCompletedTasks] = useState(0);
 
   useEffect(() => {
-    fetch(
-      `http://localhost:3000/api/projects/${data?.user._id}/${params.projectId}`
-    )
+    fetch(`http://localhost:3000/api/projects/${params.projectId}`)
       .then((res) => res.json())
       .then(async (data) => {
         const tasks = await getTasks(data._id);
+        let members: UserDocument[] = [];
+        console.log(data.members);
+        for (const memberId of data.members) {
+          const member = await getMemberInfo(memberId);
+
+          if (member) {
+            console.log({ member });
+            members.push(member);
+          }
+        }
+        setMembers(members);
+
         setProject(data);
         setTasks(tasks);
         const completedTask = tasks.filter(
@@ -64,17 +111,63 @@ export const Page = ({ params }: { params: { projectId: string } }) => {
     return tasks || [];
   };
 
-  const [showTaskForm, setShowTaskForm] = useState(false);
+  const getMemberInfo = async (userId: string) => {
+    const member = await fetch(
+      `http://localhost:3000/api/project/members/${userId}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        return data;
+      });
+    return member || null;
+  };
 
   const toggleTaskForm = () => {
     setShowTaskForm(!showTaskForm);
   };
 
-  const handleProjectCreation = async () => {
+  const toggleMemberForm = () => {
+    setShowMemberForm(!showMemberForm);
+  };
+
+  const handleTaskCreation = async (data: Task) => {
     setShowTaskForm(false);
-    const tasks = await getTasks(projectId);
+    tasks.unshift(data);
 
     setTasks(tasks);
+  };
+
+  const handleAddedMember = async (data: ProjectDocument) => {
+    setShowMemberForm(false);
+    let members: UserDocument[] = [];
+    for (const memberId of data.members) {
+      const member = await getMemberInfo(memberId);
+
+      if (member) {
+        console.log({ member });
+        members.push(member);
+      }
+    }
+
+    setMembers(members);
+  };
+
+  const updateTask = async (data: Task) => {
+    fetch(`http://localhost:3000/api/tasks/update`, {
+      method: "POST",
+
+      body: JSON.stringify(data),
+    })
+      .then((res) => res.json())
+      .then((data: any) => {
+        console.log("successfully created task", data);
+        tasks.forEach((task) => {
+          if (task._id === data._id) {
+            task = data;
+          }
+        });
+        setTasks(tasks);
+      });
   };
 
   const chartData = [
@@ -99,76 +192,211 @@ export const Page = ({ params }: { params: { projectId: string } }) => {
     return redirect("/login");
 
   return (
-    <main className="flex flex-col w-full h-full items-center">
-      <Navbar username={data?.user?.name || ""}></Navbar>
-      <BreadcrumbNav
-        homeElement={"Home"}
-        separator={<span> | </span>}
-        activeClasses="text-amber-500"
-        containerClasses="flex py-5 "
-        listClasses="hover:underline mx-2 font-bold"
-        capitalizeLinks
-        data={[
-          {
-            name: "Project",
-            url: "",
-          },
-          {
-            name: project.title,
-            url: `/project/${projectId}`,
-          },
-        ]}
-      ></BreadcrumbNav>
+    <>
+      {status === "authenticated" ? (
+        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+          <div className="hidden border-r bg-muted/40 md:block">
+            <div className="flex h-full max-h-screen flex-col gap-2">
+              <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+                <Link
+                  href="/"
+                  className="flex items-center gap-2 font-semibold"
+                >
+                  <Image
+                    src="/alpha-logo.png"
+                    alt="Image"
+                    width="120"
+                    height="120"
+                    className="h-[40px] w-[40px] object-cover dark:brightness-[0.2] dark:grayscale"
+                  />
+                  <span className="">Alpha PM</span>
+                </Link>
+              </div>
+              <div className="flex-1">
+                <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+                  <Button
+                    className={
+                      activeTab === "overview" ? LINK_STYLE_ACTIVE : LINK_STYLE
+                    }
+                    onClick={() => {
+                      setActiveTab("overview");
+                    }}
+                  >
+                    <ChartNoAxesGantt className="w-4 h-4" />
+                    Overview
+                    {/* <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+                      6
+                    </Badge> */}
+                  </Button>
 
-      <div className="grid max-w-6xl py-10 flex-col w-full grid-cols-12 gap-6">
-        <div className="title-section col-span-12">
-          <div className="grid grid-cols-2">
-            <div>
-              <h1 className="text-2xl">{project.title}</h1>
-              <p className="text-sm">{project.description}</p>
-            </div>
-
-            <div className="grid w-full flex-1 gap-6 justify-end">
-              <div className="grid auto-rows-min gap-2">
-                <div className="flex items-baseline gap-1 text-2xl font-bold tabular-nums leading-none">
-                  {completedTasks}/{tasks.length}
-                  <span className="text-sm font-normal text-muted-foreground">
-                    tasks completed
-                  </span>
-                </div>
+                  <Button
+                    className={
+                      activeTab === "tasks" ? LINK_STYLE_ACTIVE : LINK_STYLE
+                    }
+                    onClick={() => {
+                      setActiveTab("tasks");
+                    }}
+                  >
+                    <ListTodo className="h-4 w-4" />
+                    Tasks
+                  </Button>
+                  <Button
+                    className={
+                      activeTab === "members" ? LINK_STYLE_ACTIVE : LINK_STYLE
+                    }
+                    onClick={() => {
+                      setActiveTab("members");
+                    }}
+                  >
+                    <Users className="h-4 w-4" />
+                    Members
+                  </Button>
+                  <Button
+                    className={
+                      activeTab === "about" ? LINK_STYLE_ACTIVE : LINK_STYLE
+                    }
+                    onClick={() => {
+                      setActiveTab("about");
+                    }}
+                  >
+                    <Info className="h-4 w-4" />
+                    About Project
+                  </Button>
+                </nav>
               </div>
             </div>
           </div>
-        </div>
-        <div className="flex w-full max-w-6xl items-start gap-6 col-span-2 row-span-4">
-          <nav
-            className="grid w-full gap-4 text-sm text-muted-foreground bg-gray-100 px-5 py-10"
-            x-chunk="dashboard-04-chunk-0"
-          >
-            {/* <Link href="#" className="font-semibold text-primary">
-              General
-            </Link> */}
-            <button className="text-left" onClick={toggleTaskForm}>
-              Add new task
-            </button>
+          <div className="flex flex-col">
+            <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="shrink-0 md:hidden"
+                  >
+                    <Menu className="h-5 w-5" />
+                    <span className="sr-only">Toggle navigation menu</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="flex flex-col">
+                  <nav className="grid gap-2 text-lg font-medium">
+                    <Button
+                      className={
+                        activeTab === "overview"
+                          ? LINK_STYLE_ACTIVE
+                          : LINK_STYLE
+                      }
+                    >
+                      <ChartNoAxesGantt className="w-4 h-4" />
+                      Overview
+                    </Button>
+                    <Button
+                      className={
+                        activeTab === "tasks" ? LINK_STYLE_ACTIVE : LINK_STYLE
+                      }
+                    >
+                      <ListTodo className="h-4 w-4" />
+                      Tasks
+                    </Button>
+                    <Button
+                      className={
+                        activeTab === "members" ? LINK_STYLE_ACTIVE : LINK_STYLE
+                      }
+                    >
+                      <Users className="h-4 w-4" />
+                      Members
+                    </Button>
+                    <Button
+                      className={
+                        activeTab === "about" ? LINK_STYLE_ACTIVE : LINK_STYLE
+                      }
+                    >
+                      <Info className="h-4 w-4" />
+                      About Project
+                    </Button>
+                  </nav>
+                </SheetContent>
+              </Sheet>
+              <div className="w-full flex-1">
+                <form>
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="search"
+                      placeholder="Search products..."
+                      className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
+                    />
+                  </div>
+                </form>
+              </div>
 
-            {/* <Link href="#">Support</Link>
-            <Link href="#">Organizations</Link>
-            <Link href="#">Advanced</Link>
-             */}
-          </nav>
+              <LogoutButton>Logout</LogoutButton>
+            </header>
+            <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+              <div className="items-center grid grid-cols-1 gap-6">
+                <div className="flex justify-between">
+                  <h1 className="text-lg font-semibold md:text-2xl py-2">
+                    {isLoading ? "Loading" : `${project.title}`}
+                  </h1>
+                  {activeTab === "tasks" && (
+                    <Button
+                      variant={"outline"}
+                      className="flex gap-2"
+                      onClick={toggleTaskForm}
+                    >
+                      <Plus /> Create Task
+                    </Button>
+                  )}
+                  {activeTab === "members" && (
+                    <Button
+                      variant={"outline"}
+                      className="flex gap-2"
+                      onClick={toggleMemberForm}
+                    >
+                      <Plus /> Add Member
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <div className="h-full">
+                <>
+                  {isLoading ? "Loading" : null}
+                  {showTaskForm && (
+                    <CreateTask
+                      projectId={projectId}
+                      onTaskCreated={handleTaskCreation}
+                    />
+                  )}
+                  {showMemberForm && (
+                    <AddMember
+                      projectId={projectId}
+                      onMemberAdded={handleAddedMember}
+                    />
+                  )}
+                  {activeTab === "tasks" &&
+                    !showTaskForm &&
+                    !showMemberForm && (
+                      <TasksList
+                        tasks={tasks}
+                        updateTask={updateTask}
+                      ></TasksList>
+                    )}
+
+                  {activeTab === "members" &&
+                    !showTaskForm &&
+                    !showMemberForm && (
+                      <MembersList members={members}></MembersList>
+                    )}
+                </>
+              </div>
+            </main>
+          </div>
         </div>
-        <div className="col-span-10 grid gap-6">
-          {showTaskForm && (
-            <CreateTask
-              projectId={projectId}
-              onProjectCreated={handleProjectCreation}
-            />
-          )}
-          <TasksList tasks={tasks}></TasksList>
-        </div>
-      </div>
-    </main>
+      ) : (
+        router.push("/login")
+      )}
+    </>
   );
 };
 

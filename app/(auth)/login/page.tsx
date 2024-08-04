@@ -50,7 +50,7 @@ export default function Login() {
       setError(res.error as string);
     }
     if (res?.ok) {
-      return router.push("/");
+      return router.push("/dashboard");
     }
   };
 
@@ -124,7 +124,7 @@ export default function Login() {
               </div>
               <div className="mt-4 text-center text-sm">
                 Don&apos;t have an account?{" "}
-                <Link href="#" className="underline">
+                <Link href="/register" className="underline">
                   Sign up
                 </Link>
               </div>
@@ -132,7 +132,7 @@ export default function Login() {
           </div>
         </div>
       ) : (
-        router.push("/")
+        router.push("/dashboard")
       )}
     </>
   );
