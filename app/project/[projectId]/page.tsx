@@ -20,6 +20,7 @@ import { BarChart } from "lucide-react";
 import { ChartConfig, ChartContainer } from "@/app/components/ui/chart";
 import { Bar, LabelList, YAxis, XAxis } from "recharts";
 import { TaskDocument } from "@/models/Task";
+import BreadcrumbNav from "@/app/components/Breadcrumbs/breadcrumbs";
 
 export const Page = ({ params }: { params: { projectId: string } }) => {
   const { projectId } = params;
@@ -95,11 +96,29 @@ export const Page = ({ params }: { params: { projectId: string } }) => {
   if (!project) return <p>No Matching Project</p>;
 
   if (status !== "loading" && status !== "authenticated")
-    return redirect("/logiin");
+    return redirect("/login");
 
   return (
     <main className="flex flex-col w-full h-full items-center">
       <Navbar username={data?.user?.name || ""}></Navbar>
+      <BreadcrumbNav
+        homeElement={"Home"}
+        separator={<span> | </span>}
+        activeClasses="text-amber-500"
+        containerClasses="flex py-5 "
+        listClasses="hover:underline mx-2 font-bold"
+        capitalizeLinks
+        data={[
+          {
+            name: "Project",
+            url: "",
+          },
+          {
+            name: project.title,
+            url: `/project/${projectId}`,
+          },
+        ]}
+      ></BreadcrumbNav>
 
       <div className="grid max-w-6xl py-10 flex-col w-full grid-cols-12 gap-6">
         <div className="title-section col-span-12">
