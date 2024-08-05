@@ -13,20 +13,10 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { Pen, Trash2 } from "lucide-react";
 
 import { Button } from "@/app/components/ui/button";
 import { Checkbox } from "@/app/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/app/components/ui/dropdown-menu";
-import { Input } from "@/app/components/ui/input";
 import {
   Table,
   TableBody,
@@ -39,7 +29,7 @@ import { formatDate } from "@/lib/utils";
 import { UserDocument } from "@/models/User";
 
 export interface Task {
-  id: string;
+  _id: string;
   title: string;
   description: string;
   progress: number;
@@ -50,6 +40,9 @@ export interface Task {
     | "Inactive"
     | "Assigned"
     | "Not started";
+  startDate: Date;
+  endDate: Date;
+  projectId: string;
   assignedUserId: string;
   assignedUserName: string;
   members: UserDocument[];
@@ -57,7 +50,8 @@ export interface Task {
 
 interface Props {
   tasks: any;
-  updateTask: any;
+  editTask: any;
+  deleteTask: any;
 }
 
 export function TasksList(props: Props) {
@@ -70,6 +64,11 @@ export function TasksList(props: Props) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+
+  const editTask = (row: any) => {
+    console.log(row.original);
+    // props.editTask()
+  };
 
   const columns: ColumnDef<Task>[] = [
     {
@@ -199,6 +198,48 @@ export function TasksList(props: Props) {
       cell: ({ row }) => (
         <div className="text-center">
           {row.getValue("status") || "Not Started"}{" "}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "edit",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            // onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            {/* <ArrowUpDown className="ml-2 h-4 w-4" /> */}
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div
+          className="flex justify-center items-center"
+          onClick={() => props.editTask(row.original)}
+        >
+          <Pen />
+        </div>
+      ),
+    },
+    {
+      accessorKey: "delete",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            // onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            {/* <ArrowUpDown className="ml-2 h-4 w-4" /> */}
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div
+          className="flex justify-center items-center"
+          onClick={() => props.deleteTask(row.original)}
+        >
+          <Trash2 />
         </div>
       ),
     },

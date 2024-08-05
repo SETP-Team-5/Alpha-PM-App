@@ -10,8 +10,6 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
 } from "@/app/components/ui/breadcrumb";
 
 type TBreadCrumbProps = {
@@ -28,12 +26,8 @@ type TBreadCrumbProps = {
 };
 
 const BreadcrumbNav = ({
-  homeElement,
   separator,
   containerClasses,
-  listClasses,
-  activeClasses,
-  capitalizeLinks,
   data,
 }: TBreadCrumbProps) => {
   //   const paths = usePathname();

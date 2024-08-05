@@ -10,6 +10,9 @@ import Image from "next/image";
 import createTask from "@/app/components/Task/CreateTask/createTask";
 import CreateTask from "@/app/components/Task/CreateTask/createTask";
 import { Task, TasksList } from "@/app/components/TasksList/tasksList";
+import ProjectOverview, {
+  ProgressChart,
+} from "@/app/components/ProjectOveview/projectOverview";
 import {
   Card,
   CardHeader,
@@ -17,6 +20,16 @@ import {
   CardDescription,
   CardContent,
 } from "@/app/components/ui/card";
+
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/app/components/ui/sheet";
+
 import { BarChart, ChartNoAxesGantt, Info } from "lucide-react";
 import { ChartConfig, ChartContainer } from "@/app/components/ui/chart";
 import { Bar, LabelList, YAxis, XAxis } from "recharts";
@@ -26,7 +39,6 @@ import { Input } from "@/app/components/ui/input";
 import BreadcrumbNav from "@/app/components/Breadcrumbs/breadcrumbs";
 import { Badge } from "@/app/components/ui/badge";
 
-import { Sheet, SheetContent, SheetTrigger } from "@/app/components/ui/sheet";
 import {
   Bell,
   CircleUser,
@@ -49,10 +61,21 @@ import { MembersList } from "@/app/components/MembersList/MembersList";
 import AddMember from "@/app/components/Member/AddMember/addMember";
 import { UserDocument } from "@/models/User";
 import { ProjectDocument } from "@/models/Project";
+import UpdateTask from "@/app/components/Task/UpdateTask/updateTask";
+import AboutProject from "@/app/components/AboutProject/aboutProject";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/app/components/ui/dialog";
 
-const LINK_STYLE =
+export const LINK_STYLE =
   "flex items-center gap-3 bg-transparent rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-muted w-full justify-start";
-const LINK_STYLE_ACTIVE =
+export const LINK_STYLE_ACTIVE =
   "flex items-center gap-3 bg-muted rounded-lg px-3 py-2 text-black transition-all hover:text-primary hover:bg-muted w-full justify-start ";
 
 export const Page = ({ params }: { params: { projectId: string } }) => {
@@ -63,13 +86,17 @@ export const Page = ({ params }: { params: { projectId: string } }) => {
   const [project, setProject] = useState({
     title: "",
     description: "",
-  });
-  const [tasks, setTasks] = useState([] as any);
+  } as ProjectDocument);
+  const [tasks, setTasks] = useState([] as Task[]);
   const [activeTab, setActiveTab] = useState("overview");
   const [isLoading, setLoading] = useState(true);
   const [showTaskForm, setShowTaskForm] = useState(false);
+  const [showUpdateTaskForm, setShowUpdateTaskForm] = useState(false);
   const [showMemberForm, setShowMemberForm] = useState(false);
+  const [showDialogue, setShowDialogue] = useState(false);
   const [members, setMembers] = useState([] as UserDocument[]);
+  const [selectedTaskId, setSelectedTaskId] = useState("");
+  const [selectedTask, setSelectedTask] = useState({});
   const [projectProgress, setProjectProgress] = useState(0);
   const [completedTasks, setCompletedTasks] = useState(0);
 
@@ -130,6 +157,11 @@ export const Page = ({ params }: { params: { projectId: string } }) => {
     setShowMemberForm(!showMemberForm);
   };
 
+  const toggleUpdateTaskForm = (task: Task) => {
+    setSelectedTask(task);
+    setShowUpdateTaskForm(!showUpdateTaskForm);
+  };
+
   const handleTaskCreation = async (data: Task) => {
     setShowTaskForm(false);
     tasks.unshift(data);
@@ -152,21 +184,38 @@ export const Page = ({ params }: { params: { projectId: string } }) => {
     setMembers(members);
   };
 
-  const updateTask = async (data: Task) => {
-    fetch(`http://localhost:3000/api/tasks/update`, {
+  const handleUpdatedTask = async (data: Task) => {
+    tasks.forEach((task: Task, index: number) => {
+      if (task._id === data._id) {
+        tasks[index] = data;
+      }
+    });
+
+    setShowUpdateTaskForm(false);
+    setTasks([...tasks]);
+  };
+
+  const handleDeleteTaskRequest = (task: Task) => {
+    setSelectedTaskId(task._id);
+    setShowDialogue(true);
+  };
+
+  const deleteTask = async () => {
+    fetch(`http://localhost:3000/api/tasks/delete`, {
       method: "POST",
 
-      body: JSON.stringify(data),
+      body: JSON.stringify({ _id: selectedTaskId }),
     })
       .then((res) => res.json())
       .then((data: any) => {
-        console.log("successfully created task", data);
-        tasks.forEach((task) => {
-          if (task._id === data._id) {
-            task = data;
-          }
-        });
-        setTasks(tasks);
+        console.log({ data });
+        setShowDialogue(false);
+        const filteredTask = tasks.filter(
+          (task: Task) => task._id !== selectedTaskId
+        );
+        // setProject(data);
+        // setLoading(false);
+        setTasks(filteredTask);
       });
   };
 
@@ -195,6 +244,30 @@ export const Page = ({ params }: { params: { projectId: string } }) => {
     <>
       {status === "authenticated" ? (
         <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+          <Sheet open={showUpdateTaskForm} onOpenChange={setShowUpdateTaskForm}>
+            <SheetContent>
+              <UpdateTask
+                task={selectedTask as Task}
+                onTaskUpdated={handleUpdatedTask}
+                members={members}
+              />
+            </SheetContent>
+          </Sheet>
+
+          <Dialog open={showDialogue} onOpenChange={setShowDialogue}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  Are you sure you want to delete the task?
+                </DialogTitle>
+
+                <DialogFooter>
+                  <Button onClick={() => deleteTask()}>Yes</Button>
+                </DialogFooter>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
+
           <div className="hidden border-r bg-muted/40 md:block">
             <div className="flex h-full max-h-screen flex-col gap-2">
               <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
@@ -379,7 +452,8 @@ export const Page = ({ params }: { params: { projectId: string } }) => {
                     !showMemberForm && (
                       <TasksList
                         tasks={tasks}
-                        updateTask={updateTask}
+                        editTask={toggleUpdateTaskForm}
+                        deleteTask={handleDeleteTaskRequest}
                       ></TasksList>
                     )}
 
@@ -387,6 +461,22 @@ export const Page = ({ params }: { params: { projectId: string } }) => {
                     !showTaskForm &&
                     !showMemberForm && (
                       <MembersList members={members}></MembersList>
+                    )}
+
+                  {activeTab === "about" &&
+                    !showTaskForm &&
+                    !showMemberForm && (
+                      <AboutProject project={project}></AboutProject>
+                    )}
+
+                  {activeTab === "overview" &&
+                    !showTaskForm &&
+                    !showMemberForm && (
+                      <ProjectOverview
+                        tasks={tasks}
+                        project={project}
+                        members={members}
+                      />
                     )}
                 </>
               </div>

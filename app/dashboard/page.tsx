@@ -45,6 +45,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import LogoutButton from "../components/logout/logout";
 import { formatDate } from "@/lib/utils";
+import CreateProject from "../components/Project/CreateProject/createProject";
+import { ProjectDocument } from "@/models/Project";
+import { LINK_STYLE, LINK_STYLE_ACTIVE } from "../project/[projectId]/page";
 
 export default function Dashboard() {
   const { data, status } = useSession();
@@ -52,7 +55,8 @@ export default function Dashboard() {
 
   const [projects, setProjects] = useState([] as any);
   const [isLoading, setLoading] = useState(true);
-
+  const [showProjectForm, setShowProjectForm] = useState(false);
+  const [activeTab, setActiveTab] = useState("projects");
   useEffect(() => {
     if (status === "authenticated") {
       fetch(`http://localhost:3000/api/projects/all/${data?.user._id}`)
@@ -73,6 +77,15 @@ export default function Dashboard() {
   if (status === "unauthenticated") {
     return <div>loading...</div>;
   }
+  const toggleProjectForm = () => {
+    setShowProjectForm(!showProjectForm);
+  };
+
+  const handleProjectCreated = (project: ProjectDocument) => {
+    setShowProjectForm(false);
+    projects.unshift(project);
+    setProjects(projects);
+  };
 
   return (
     <>
@@ -97,44 +110,28 @@ export default function Dashboard() {
               </div>
               <div className="flex-1">
                 <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-                  <Link
-                    href="#"
-                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                  <Button
+                    className={
+                      activeTab === "projects" ? LINK_STYLE_ACTIVE : LINK_STYLE
+                    }
+                    onClick={() => {
+                      setActiveTab("projects");
+                    }}
                   >
-                    <Home className="h-4 w-4" />
-                    Dashboard
-                  </Link>
-                  <Link
-                    href="#"
-                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-                  >
-                    <ShoppingCart className="h-4 w-4" />
-                    Orders
-                    <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                      6
-                    </Badge>
-                  </Link>
-                  <Link
-                    href="#"
-                    className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
-                  >
-                    <SquareChartGantt className="h-4 w-4" />
-                    Projects{" "}
-                  </Link>
-                  <Link
-                    href="#"
-                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                    <Users className="h-4 w-4" />
+                    My Projects
+                  </Button>
+                  <Button
+                    className={
+                      activeTab === "tasks" ? LINK_STYLE_ACTIVE : LINK_STYLE
+                    }
+                    onClick={() => {
+                      setActiveTab("tasks");
+                    }}
                   >
                     <ListTodo className="h-4 w-4" />
-                    Tasks
-                  </Link>
-                  <Link
-                    href="#"
-                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-                  >
-                    <LineChart className="h-4 w-4" />
-                    Analytics
-                  </Link>
+                    My Tasks
+                  </Button>
                 </nav>
               </div>
             </div>
@@ -222,13 +219,22 @@ export default function Dashboard() {
                 <h1 className="text-lg font-semibold md:text-2xl">
                   {isLoading ? "Loading" : `Hello, ${data.user?.name}`}
                 </h1>
-                <Button variant={"outline"} className="flex gap-2">
+                <Button
+                  variant={"outline"}
+                  className="flex gap-2"
+                  onClick={toggleProjectForm}
+                >
                   <Plus /> Create Project
                 </Button>
               </div>
               <div className="h-full">
                 <>
-                  {projects.length ? (
+                  {showProjectForm && (
+                    <CreateProject onProjectCreated={handleProjectCreated} />
+                  )}
+                  {projects.length &&
+                  !showProjectForm &&
+                  activeTab === "projects" ? (
                     <div className="grid grid-cols-3 gap-6 ">
                       {projects.map((project: any) => {
                         return (
@@ -256,19 +262,21 @@ export default function Dashboard() {
                       })}
                     </div>
                   ) : (
-                    <div
-                      className="flex flex-1 h-full w-full items-center justify-center rounded-lg border border-dashed shadow-sm"
-                      x-chunk="dashboard-02-chunk-1"
-                    >
-                      <div className="flex flex-col items-center gap-1 text-center">
-                        <h3 className="text-2xl font-bold tracking-tight">
-                          You have no projects
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          Start by creating a new project.
-                        </p>
+                    !showProjectForm && (
+                      <div
+                        className="flex flex-1 h-full w-full items-center justify-center rounded-lg border border-dashed shadow-sm"
+                        x-chunk="dashboard-02-chunk-1"
+                      >
+                        <div className="flex flex-col items-center gap-1 text-center">
+                          <h3 className="text-2xl font-bold tracking-tight">
+                            You have no projects
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            Start by creating a new project.
+                          </p>
+                        </div>
                       </div>
-                    </div>
+                    )
                   )}
                 </>
               </div>
