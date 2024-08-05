@@ -51,8 +51,6 @@ export function ProgressChart(props: ProgressChartProps) {
 
   const endAngle = (360 * progress) / 100;
 
-  console.log(progress);
-
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
@@ -126,7 +124,7 @@ export function ProgressChart(props: ProgressChartProps) {
 
 const ProjectOverview = (props: Props) => {
   const { tasks, members, project } = props;
-  console.log(tasks);
+
   const taskStatus: Task["status"][] = [
     "In Progress",
     "Completed",
@@ -143,8 +141,6 @@ const ProjectOverview = (props: Props) => {
   tasks.forEach((task) => {
     taskGrouped[task.status] += 1;
   });
-
-  console.log(taskGrouped);
 
   let taskStatusNumbers: any = [];
 

@@ -92,7 +92,6 @@ const AddMemberForm = (props: Props) => {
   });
 
   async function onSubmit(formData: { email: string }) {
-    console.log({ formData });
     const { _id, name } = users.find(
       (user: any) => user.email === formData.email
     );
@@ -106,7 +105,6 @@ const AddMemberForm = (props: Props) => {
     })
       .then((res) => res.json())
       .then((data: any) => {
-        console.log("successfully created task", data);
         props.onMemberAdded(data);
         // setProject(data);
         // setLoading(false);

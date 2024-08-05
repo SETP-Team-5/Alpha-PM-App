@@ -77,7 +77,6 @@ const CreateTask = (props: Props) => {
     startDate: Date;
     endDate: Date;
   }) {
-    console.log({ formData });
     fetch(`http://localhost:3000/api/tasks/create`, {
       method: "POST",
 
@@ -85,7 +84,6 @@ const CreateTask = (props: Props) => {
     })
       .then((res) => res.json())
       .then((data: any) => {
-        console.log("successfully created task", data);
         props.onTaskCreated(data);
         // setProject(data);
         // setLoading(false);

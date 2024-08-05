@@ -70,7 +70,6 @@ const CreateProject = (props: Props) => {
     endDate: Date;
     members?: string[];
   }) {
-    console.log({ formData });
     formData.members = [];
 
     fetch(`http://localhost:3000/api/projects/create`, {
@@ -80,7 +79,6 @@ const CreateProject = (props: Props) => {
     })
       .then((res) => res.json())
       .then((data: any) => {
-        console.log("successfully created task", data);
         props.onProjectCreated(data);
       });
   }

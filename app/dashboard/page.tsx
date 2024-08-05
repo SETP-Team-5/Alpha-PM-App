@@ -48,15 +48,29 @@ import { formatDate } from "@/lib/utils";
 import CreateProject from "../components/Project/CreateProject/createProject";
 import { ProjectDocument } from "@/models/Project";
 import { LINK_STYLE, LINK_STYLE_ACTIVE } from "../project/[projectId]/page";
+import { Task, TasksList } from "../components/TasksList/tasksList";
+import UpdateTask from "../components/Task/UpdateTask/updateTask";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
 
 export default function Dashboard() {
   const { data, status } = useSession();
   const router = useRouter();
 
   const [projects, setProjects] = useState([] as any);
+  const [tasks, setTasks] = useState([] as any);
   const [isLoading, setLoading] = useState(true);
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [activeTab, setActiveTab] = useState("projects");
+  const [showUpdateTaskForm, setShowUpdateTaskForm] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState("");
+  const [selectedTask, setSelectedTask] = useState({});
+  const [showDialogue, setShowDialogue] = useState(false);
   useEffect(() => {
     if (status === "authenticated") {
       fetch(`http://localhost:3000/api/projects/all/${data?.user._id}`)
@@ -70,6 +84,19 @@ export default function Dashboard() {
           // ).length;
           // setCompletedTasks(completedTask);
           setLoading(false);
+        });
+      fetch(`http://localhost:3000/api/tasks/${data?.user._id}`)
+        .then((res) => res.json())
+        .then(async (data) => {
+          // const tasks = await getTasks(data._id);
+          setTasks(data);
+
+          // setTasks(tasks);
+          // const completedTask = tasks.filter(
+          //   (task: TaskDocument) => task.status === "Completed"
+          // ).length;
+          // setCompletedTasks(completedTask);
+          // setLoading(false);
         });
     }
   }, []);
@@ -87,10 +114,72 @@ export default function Dashboard() {
     setProjects(projects);
   };
 
+  const toggleUpdateTaskForm = (task: Task) => {
+    setSelectedTask(task);
+    setShowUpdateTaskForm(!showUpdateTaskForm);
+  };
+
+  const handleUpdatedTask = async (data: Task) => {
+    tasks.forEach((task: Task, index: number) => {
+      if (task._id === data._id) {
+        tasks[index] = data;
+      }
+    });
+
+    setShowUpdateTaskForm(false);
+    setTasks([...tasks]);
+  };
+
+  const handleDeleteTaskRequest = (task: Task) => {
+    setSelectedTaskId(task._id);
+    setShowDialogue(true);
+  };
+
+  const deleteTask = async () => {
+    fetch(`http://localhost:3000/api/tasks/delete`, {
+      method: "POST",
+
+      body: JSON.stringify({ _id: selectedTaskId }),
+    })
+      .then((res) => res.json())
+      .then((data: any) => {
+        setShowDialogue(false);
+        const filteredTask = tasks.filter(
+          (task: Task) => task._id !== selectedTaskId
+        );
+        // setProject(data);
+        // setLoading(false);
+        setTasks(filteredTask);
+      });
+  };
+
   return (
     <>
       {status === "authenticated" ? (
         <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+          <Sheet open={showUpdateTaskForm} onOpenChange={setShowUpdateTaskForm}>
+            <SheetContent>
+              <UpdateTask
+                task={selectedTask as Task}
+                onTaskUpdated={handleUpdatedTask}
+                // members={members}
+              />
+            </SheetContent>
+          </Sheet>
+
+          <Dialog open={showDialogue} onOpenChange={setShowDialogue}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  Are you sure you want to delete the task?
+                </DialogTitle>
+
+                <DialogFooter>
+                  <Button onClick={() => deleteTask()}>Yes</Button>
+                </DialogFooter>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
           <div className="hidden border-r bg-muted/40 md:block">
             <div className="flex h-full max-h-screen flex-col gap-2">
               <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
@@ -232,6 +321,14 @@ export default function Dashboard() {
                   {showProjectForm && (
                     <CreateProject onProjectCreated={handleProjectCreated} />
                   )}
+                  {activeTab === "tasks" && !showProjectForm && (
+                    <TasksList
+                      tasks={tasks}
+                      editTask={toggleUpdateTaskForm}
+                      deleteTask={handleDeleteTaskRequest}
+                      memberType={"member"}
+                    ></TasksList>
+                  )}
                   {projects.length &&
                   !showProjectForm &&
                   activeTab === "projects" ? (
@@ -262,18 +359,21 @@ export default function Dashboard() {
                       })}
                     </div>
                   ) : (
-                    !showProjectForm && (
+                    !showProjectForm &&
+                    !tasks.length && (
                       <div
                         className="flex flex-1 h-full w-full items-center justify-center rounded-lg border border-dashed shadow-sm"
                         x-chunk="dashboard-02-chunk-1"
                       >
                         <div className="flex flex-col items-center gap-1 text-center">
                           <h3 className="text-2xl font-bold tracking-tight">
-                            You have no projects
+                            You have no {activeTab}
                           </h3>
-                          <p className="text-sm text-muted-foreground">
-                            Start by creating a new project.
-                          </p>
+                          {activeTab === "projects" && (
+                            <p className="text-sm text-muted-foreground">
+                              Start by creating a new project.
+                            </p>
+                          )}
                         </div>
                       </div>
                     )

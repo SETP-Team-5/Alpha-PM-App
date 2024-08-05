@@ -38,8 +38,6 @@ export const POST = async (req: NextRequest, context: any) => {
     assignedUserName,
   } = params;
 
-  console.log({ projectId });
-
   const createdAt = new Date();
   const updatedAt = new Date();
   connectDB();
@@ -61,7 +59,7 @@ export const POST = async (req: NextRequest, context: any) => {
       assignedUserName,
     });
     const task = await newTask.save();
-    console.log(task);
+
     return NextResponse.json(task);
   } catch (error) {
     console.log({ error });

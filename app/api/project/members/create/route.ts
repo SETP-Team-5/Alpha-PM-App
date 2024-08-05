@@ -7,8 +7,6 @@ export const POST = async (req: NextRequest, context: any) => {
   const { method } = req;
   const params = await req.json();
 
-  console.log(params);
-
   const { projectId, name, _id } = params;
 
   connectDB();
@@ -17,7 +15,6 @@ export const POST = async (req: NextRequest, context: any) => {
 
   try {
     const project = await Project.findById(projectId).exec();
-    console.log(project);
 
     if (project.members?.indexOf(_id) === -1) {
       project.members = [...project.members, _id];
@@ -27,7 +24,6 @@ export const POST = async (req: NextRequest, context: any) => {
 
     return NextResponse.json(updatedproject);
   } catch (error) {
-    console.log({ error });
     NextResponse.json({ success: false, error: (error as Error).message });
   }
 };

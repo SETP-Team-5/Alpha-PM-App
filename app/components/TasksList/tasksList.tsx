@@ -52,6 +52,7 @@ interface Props {
   tasks: any;
   editTask: any;
   deleteTask: any;
+  memberType?: string;
 }
 
 export function TasksList(props: Props) {
@@ -64,11 +65,6 @@ export function TasksList(props: Props) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-
-  const editTask = (row: any) => {
-    console.log(row.original);
-    // props.editTask()
-  };
 
   const columns: ColumnDef<Task>[] = [
     {
@@ -222,7 +218,10 @@ export function TasksList(props: Props) {
         </div>
       ),
     },
-    {
+  ];
+
+  if (props.memberType !== "member") {
+    columns.push({
       accessorKey: "delete",
       header: ({ column }) => {
         return (
@@ -242,8 +241,8 @@ export function TasksList(props: Props) {
           <Trash2 />
         </div>
       ),
-    },
-  ];
+    });
+  }
 
   const table = useReactTable({
     data,

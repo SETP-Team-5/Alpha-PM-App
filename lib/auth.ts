@@ -71,7 +71,7 @@ export const config = {
 
         if (!passwordMatch)
           throw new Error("Wrong Password! Please try again.");
-        console.log(user);
+
         return user;
       },
     }),
@@ -83,7 +83,6 @@ export const config = {
     // FOR MORE DETAIL ABOUT CALLBACK FUNCTIONS CHECK https://next-auth.js.org/configuration/callbacks
     async jwt({ token, user }) {
       if (user) {
-        console.log(user.id);
         token._id = user.id;
       }
       return token;

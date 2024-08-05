@@ -24,8 +24,6 @@ export const createProject = async (formData: {
   const createdAt = new Date();
   const updatedAt = new Date();
 
-  console.log(description);
-
   try {
     connectDB();
     const newProject = new Project({

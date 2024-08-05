@@ -77,8 +77,6 @@ export function MembersList(props: Props) {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  console.log({ data });
-
   const table = useReactTable({
     data,
     columns,

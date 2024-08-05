@@ -106,12 +106,11 @@ export const Page = ({ params }: { params: { projectId: string } }) => {
       .then(async (data) => {
         const tasks = await getTasks(data._id);
         let members: UserDocument[] = [];
-        console.log(data.members);
+
         for (const memberId of data.members) {
           const member = await getMemberInfo(memberId);
 
           if (member) {
-            console.log({ member });
             members.push(member);
           }
         }
@@ -176,7 +175,6 @@ export const Page = ({ params }: { params: { projectId: string } }) => {
       const member = await getMemberInfo(memberId);
 
       if (member) {
-        console.log({ member });
         members.push(member);
       }
     }

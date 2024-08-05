@@ -69,14 +69,12 @@ const statusOptions = [
 interface Props {
   task: Task;
   onTaskUpdated: any;
-  members: UserDocument[];
+  members?: UserDocument[];
 }
 
 const UpdateTask = (props: Props) => {
   const { data, status } = useSession();
   const { task, members } = props;
-
-  console.log(task);
 
   const router = useRouter();
 
@@ -97,9 +95,7 @@ const UpdateTask = (props: Props) => {
   });
 
   async function onSubmit(formData: any) {
-    console.log({ formData });
-
-    let assignedUser = members.find(
+    let assignedUser = members?.find(
       (member) => member._id === formData.assignedUserId
     );
     if (assignedUser) {
@@ -113,7 +109,6 @@ const UpdateTask = (props: Props) => {
     })
       .then((res) => res.json())
       .then((data: any) => {
-        console.log("successfully created task", data);
         props.onTaskUpdated(data);
       });
   }
@@ -291,37 +286,40 @@ const UpdateTask = (props: Props) => {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="assignedUserId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Assign To</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select user" />
-                          </SelectTrigger>
-                        </FormControl>
+                {members?.length && (
+                  <FormField
+                    control={form.control}
+                    name="assignedUserId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Assign To</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select user" />
+                            </SelectTrigger>
+                          </FormControl>
 
-                        <SelectContent>
-                          {members.map((member) => {
-                            return (
-                              <SelectItem value={member._id}>
-                                {member.email}
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectContent>
-                      </Select>
+                          <SelectContent>
+                            {members?.map((member) => {
+                              return (
+                                <SelectItem value={member._id}>
+                                  {member.email}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
 
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
                 <Button type="submit">Update</Button>
               </form>
             </Form>
