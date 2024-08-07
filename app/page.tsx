@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
-export const Home = async () => {
+export default async function Page() {
   const session = await auth();
 
   const showSession = () => {
@@ -17,6 +17,4 @@ export const Home = async () => {
       {showSession()}
     </main>
   );
-};
-
-export default Home;
+}

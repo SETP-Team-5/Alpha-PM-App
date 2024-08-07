@@ -72,13 +72,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/app/components/ui/dialog";
+import { LINK_STYLE_ACTIVE, LINK_STYLE } from "@/lib/constants";
 
-export const LINK_STYLE =
-  "flex items-center gap-3 bg-transparent rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-muted w-full justify-start";
-export const LINK_STYLE_ACTIVE =
-  "flex items-center gap-3 bg-muted rounded-lg px-3 py-2 text-black transition-all hover:text-primary hover:bg-muted w-full justify-start ";
-
-export const Page = ({ params }: { params: { projectId: string } }) => {
+export default function Page({ params }: { params: { projectId: string } }) {
   const { projectId } = params;
   const { data, status } = useSession();
   const router = useRouter();
@@ -486,6 +482,4 @@ export const Page = ({ params }: { params: { projectId: string } }) => {
       )}
     </>
   );
-};
-
-export default Page;
+}

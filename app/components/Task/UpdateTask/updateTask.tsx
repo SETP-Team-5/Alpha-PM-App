@@ -50,7 +50,7 @@ const formSchema = z.object({
   description: z.string().min(0).max(300),
   startDate: z.date(),
   endDate: z.date(),
-  progress: z.preprocess((val) => Number(val), z.number().positive()),
+  progress: z.preprocess((val) => Number(val), z.number().nonnegative()),
   projectId: z.string().min(2).max(100),
   status: z.string().min(2).max(100),
   assignedUserId: z.string().min(0).max(100),

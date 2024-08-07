@@ -46,6 +46,7 @@ import {
   Command,
 } from "../../ui/command";
 import { useEffect, useState } from "react";
+import { UserDocument } from "@/models/User";
 
 const formSchema = z.object({
   email: z.string().email().min(3).max(200),
@@ -155,25 +156,27 @@ const AddMemberForm = (props: Props) => {
                             <CommandList>
                               <CommandEmpty>No user found.</CommandEmpty>
                               <CommandGroup>
-                                {users.map(({ email }, index) => (
-                                  <CommandItem
-                                    value={`${email}`}
-                                    key={index}
-                                    onSelect={() => {
-                                      form.setValue("email", `${email}`);
-                                    }}
-                                  >
-                                    <Check
-                                      className={cn(
-                                        "mr-2 h-4 w-4",
-                                        email === field.value
-                                          ? "opacity-100"
-                                          : "opacity-0"
-                                      )}
-                                    />
-                                    {email}
-                                  </CommandItem>
-                                ))}
+                                {users.map(
+                                  ({ email }: UserDocument, index: number) => (
+                                    <CommandItem
+                                      value={`${email}`}
+                                      key={index}
+                                      onSelect={() => {
+                                        form.setValue("email", `${email}`);
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          email === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                      {email}
+                                    </CommandItem>
+                                  )
+                                )}
                               </CommandGroup>
                             </CommandList>
                           </Command>

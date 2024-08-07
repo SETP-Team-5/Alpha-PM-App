@@ -47,8 +47,9 @@ const formSchema = z.object({
 });
 
 const createProjectForm = () => {
-  const { data, status } = useSession();
-  console.log({ data });
+  const session = useSession();
+  const status = session.status;
+  const sessionData = session.data as any;
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -73,7 +74,7 @@ const createProjectForm = () => {
         description: formData.description,
         startDate: formData.startDate,
         endDate: formData.endDate,
-        userId: data?.user?._id,
+        userId: sessionData?.user?._id,
         members: [],
       });
     }

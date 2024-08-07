@@ -48,8 +48,9 @@ interface Props {
 }
 
 const CreateProject = (props: Props) => {
-  const { data, status } = useSession();
-
+  const session = useSession();
+  const status = session.status;
+  const sessionData = session.data as any;
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -59,7 +60,7 @@ const CreateProject = (props: Props) => {
       description: "",
       startDate: new Date(),
       endDate: new Date(),
-      userId: data?.user?._id || "",
+      userId: sessionData?.user?._id || "",
     },
   });
 
