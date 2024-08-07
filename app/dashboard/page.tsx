@@ -79,13 +79,11 @@ export default function Dashboard() {
   useEffect(() => {
     if (status === "authenticated" && sessionData?.user?._id) {
       console.log("effect runnign");
-      fetch(`http://localhost:3000/api/projects/all/${sessionData?.user._id}`)
+      fetch(`/api/projects/all/${sessionData?.user._id}`)
         .then((res) => res.json())
         .then(async (data: any) => {
           setProjects(data);
-          await fetch(
-            `http://localhost:3000/api/tasks/${sessionData?.user._id}`
-          )
+          await fetch(`/api/tasks/${sessionData?.user._id}`)
             .then((res) => res.json())
             .then(async (data) => {
               setTasks(data);
@@ -141,7 +139,7 @@ export default function Dashboard() {
   };
 
   const deleteTask = async () => {
-    fetch(`http://localhost:3000/api/tasks/delete`, {
+    fetch(`/api/tasks/delete`, {
       method: "POST",
 
       body: JSON.stringify({ _id: selectedTaskId }),

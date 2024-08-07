@@ -77,7 +77,7 @@ const CreateTask = (props: Props) => {
     startDate: Date;
     endDate: Date;
   }) {
-    fetch(`http://localhost:3000/api/tasks/create`, {
+    fetch(`/api/tasks/create`, {
       method: "POST",
 
       body: JSON.stringify(formData),

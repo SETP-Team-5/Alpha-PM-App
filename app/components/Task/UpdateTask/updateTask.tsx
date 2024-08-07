@@ -102,7 +102,7 @@ const UpdateTask = (props: Props) => {
       formData.assignedUserName = assignedUser.name;
     }
 
-    fetch(`http://localhost:3000/api/tasks/update`, {
+    fetch(`/api/tasks/update`, {
       method: "POST",
 
       body: JSON.stringify(formData),

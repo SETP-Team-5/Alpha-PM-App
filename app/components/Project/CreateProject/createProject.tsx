@@ -73,7 +73,7 @@ const CreateProject = (props: Props) => {
   }) {
     formData.members = [];
 
-    fetch(`http://localhost:3000/api/projects/create`, {
+    fetch(`/api/projects/create`, {
       method: "POST",
 
       body: JSON.stringify(formData),

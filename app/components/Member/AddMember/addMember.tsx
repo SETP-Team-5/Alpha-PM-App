@@ -78,7 +78,7 @@ const AddMemberForm = (props: Props) => {
   const [users, setUsers] = useState([] as any);
 
   useEffect(() => {
-    fetch(`http://localhost:3000/api/users/all`)
+    fetch(`/api/users/all`)
       .then((res) => res.json())
       .then(async (data) => {
         setUsers(data);
@@ -99,7 +99,7 @@ const AddMemberForm = (props: Props) => {
 
     const requestData = { name, _id, projectId };
 
-    fetch(`http://localhost:3000/api/project/members/create`, {
+    fetch(`/api/project/members/create`, {
       method: "POST",
 
       body: JSON.stringify(requestData),
