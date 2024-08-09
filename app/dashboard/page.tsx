@@ -138,6 +138,13 @@ export default function Dashboard() {
     setShowDialogue(true);
   };
 
+  const handleTabChange = (name: string) => {
+    setShowDialogue(false);
+    setShowUpdateTaskForm(false);
+    setShowProjectForm(false);
+    setActiveTab(name);
+  };
+
   const deleteTask = async () => {
     fetch(`/api/tasks/delete`, {
       method: "POST",
@@ -213,7 +220,7 @@ export default function Dashboard() {
                           : LINK_STYLE
                       }
                       onClick={() => {
-                        setActiveTab("projects");
+                        handleTabChange("projects");
                       }}
                     >
                       <Users className="h-4 w-4" />
@@ -224,7 +231,7 @@ export default function Dashboard() {
                         activeTab === "tasks" ? LINK_STYLE_ACTIVE : LINK_STYLE
                       }
                       onClick={() => {
-                        setActiveTab("tasks");
+                        handleTabChange("tasks");
                       }}
                     >
                       <ListTodo className="h-4 w-4" />

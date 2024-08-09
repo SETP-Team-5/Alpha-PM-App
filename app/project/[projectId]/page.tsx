@@ -209,6 +209,14 @@ export default function Page({ params }: { params: { projectId: string } }) {
       });
   };
 
+  const handleTabChange = (name: string) => {
+    setShowDialogue(false);
+    setShowMemberForm(false);
+    setShowTaskForm(false);
+    setShowUpdateTaskForm(false);
+    setActiveTab(name);
+  };
+
   const chartData = [
     { month: "January", desktop: 186 },
     { month: "February", desktop: 305 },
@@ -218,12 +226,6 @@ export default function Page({ params }: { params: { projectId: string } }) {
     { month: "June", desktop: 214 },
   ];
 
-  const chartConfig = {
-    desktop: {
-      label: "Desktop",
-      color: "hsl(var(--chart-1))",
-    },
-  } satisfies ChartConfig;
   if (isLoading) return <p>Loading...</p>;
   if (!project) return <p>No Matching Project</p>;
 
@@ -282,7 +284,7 @@ export default function Page({ params }: { params: { projectId: string } }) {
                       activeTab === "overview" ? LINK_STYLE_ACTIVE : LINK_STYLE
                     }
                     onClick={() => {
-                      setActiveTab("overview");
+                      handleTabChange("overview");
                     }}
                   >
                     <ChartNoAxesGantt className="w-4 h-4" />
@@ -297,7 +299,7 @@ export default function Page({ params }: { params: { projectId: string } }) {
                       activeTab === "tasks" ? LINK_STYLE_ACTIVE : LINK_STYLE
                     }
                     onClick={() => {
-                      setActiveTab("tasks");
+                      handleTabChange("tasks");
                     }}
                   >
                     <ListTodo className="h-4 w-4" />
@@ -308,7 +310,7 @@ export default function Page({ params }: { params: { projectId: string } }) {
                       activeTab === "members" ? LINK_STYLE_ACTIVE : LINK_STYLE
                     }
                     onClick={() => {
-                      setActiveTab("members");
+                      handleTabChange("members");
                     }}
                   >
                     <Users className="h-4 w-4" />
@@ -319,7 +321,7 @@ export default function Page({ params }: { params: { projectId: string } }) {
                       activeTab === "about" ? LINK_STYLE_ACTIVE : LINK_STYLE
                     }
                     onClick={() => {
-                      setActiveTab("about");
+                      handleTabChange("about");
                     }}
                   >
                     <Info className="h-4 w-4" />
