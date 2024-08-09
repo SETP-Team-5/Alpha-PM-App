@@ -97,7 +97,7 @@ export default function Page({ params }: { params: { projectId: string } }) {
   const [completedTasks, setCompletedTasks] = useState(0);
 
   useEffect(() => {
-    fetch(`/api/projects/${params.projectId}`)
+    fetch(`/api/projects/${params.projectId}`, { cache: "no-store" })
       .then((res) => res.json())
       .then(async (data) => {
         const tasks = await getTasks(data._id);
@@ -123,7 +123,9 @@ export default function Page({ params }: { params: { projectId: string } }) {
   }, []);
 
   const getTasks = async (projectId: string) => {
-    const tasks = await fetch(`/api/tasks/all/${projectId}`)
+    const tasks = await fetch(`/api/tasks/all/${projectId}`, {
+      cache: "no-store",
+    })
       .then((res) => res.json())
       .then((data) => {
         return data;
@@ -132,7 +134,9 @@ export default function Page({ params }: { params: { projectId: string } }) {
   };
 
   const getMemberInfo = async (userId: string) => {
-    const member = await fetch(`/api/project/members/${userId}`)
+    const member = await fetch(`/api/project/members/${userId}`, {
+      cache: "no-store",
+    })
       .then((res) => res.json())
       .then((data) => {
         return data;
@@ -195,6 +199,7 @@ export default function Page({ params }: { params: { projectId: string } }) {
       method: "POST",
 
       body: JSON.stringify({ _id: selectedTaskId }),
+      cache: "no-store",
     })
       .then((res) => res.json())
       .then((data: any) => {

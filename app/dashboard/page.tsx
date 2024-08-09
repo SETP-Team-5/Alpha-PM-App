@@ -79,7 +79,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (status === "authenticated" && sessionData?.user?._id) {
       console.log("effect runnign");
-      fetch(`/api/projects/all/${sessionData?.user._id}`)
+      fetch(`/api/projects/all/${sessionData?.user._id}`, { cache: "no-store" })
         .then((res) => res.json())
         .then(async (data: any) => {
           setProjects(data);
