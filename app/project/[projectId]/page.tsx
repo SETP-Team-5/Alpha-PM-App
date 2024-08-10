@@ -73,6 +73,7 @@ import {
   DialogTrigger,
 } from "@/app/components/ui/dialog";
 import { LINK_STYLE_ACTIVE, LINK_STYLE } from "@/lib/constants";
+import { LoadingSpinner } from "@/app/components/LoadingSpinner/loadingSpinner";
 
 export default function Page({ params }: { params: { projectId: string } }) {
   const { projectId } = params;
@@ -95,6 +96,8 @@ export default function Page({ params }: { params: { projectId: string } }) {
   const [selectedTask, setSelectedTask] = useState({});
   const [projectProgress, setProjectProgress] = useState(0);
   const [completedTasks, setCompletedTasks] = useState(0);
+  const [showProjectDialogue, setShowProjectDialogue] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState("");
 
   useEffect(() => {
     fetch(`/api/projects/${params.projectId}`, { cache: "no-store" })
@@ -222,6 +225,24 @@ export default function Page({ params }: { params: { projectId: string } }) {
     setActiveTab(name);
   };
 
+  const handleDeleteProject = (project: ProjectDocument) => {
+    setSelectedProjectId(project._id);
+    setShowProjectDialogue(true);
+  };
+
+  const deleteProject = async () => {
+    fetch(`/api/projects/delete`, {
+      method: "POST",
+
+      body: JSON.stringify({ _id: selectedProjectId }),
+      cache: "no-store",
+    })
+      .then((res) => res.json())
+      .then((data: any) => {
+        router.push("/dashboard");
+      });
+  };
+
   const chartData = [
     { month: "January", desktop: 186 },
     { month: "February", desktop: 305 },
@@ -231,7 +252,12 @@ export default function Page({ params }: { params: { projectId: string } }) {
     { month: "June", desktop: 214 },
   ];
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center items-center min-h-screen w-full">
+        <LoadingSpinner />
+      </div>
+    );
   if (!project) return <p>No Matching Project</p>;
 
   if (status !== "loading" && status !== "authenticated")
@@ -242,12 +268,14 @@ export default function Page({ params }: { params: { projectId: string } }) {
       {status === "authenticated" ? (
         <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
           <Sheet open={showUpdateTaskForm} onOpenChange={setShowUpdateTaskForm}>
-            <SheetContent>
-              <UpdateTask
-                task={selectedTask as Task}
-                onTaskUpdated={handleUpdatedTask}
-                members={members}
-              />
+            <SheetContent className="flex flex-col">
+              <div className="overflow-auto">
+                <UpdateTask
+                  task={selectedTask as Task}
+                  onTaskUpdated={handleUpdatedTask}
+                  members={members}
+                />
+              </div>
             </SheetContent>
           </Sheet>
 
@@ -264,7 +292,22 @@ export default function Page({ params }: { params: { projectId: string } }) {
               </DialogHeader>
             </DialogContent>
           </Dialog>
+          <Dialog
+            open={showProjectDialogue}
+            onOpenChange={setShowProjectDialogue}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  Are you sure you want to delete the project and related tasks?
+                </DialogTitle>
 
+                <DialogFooter>
+                  <Button onClick={() => deleteProject()}>Yes</Button>
+                </DialogFooter>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
           <div className="hidden border-r bg-muted/40 md:block">
             <div className="flex h-full max-h-screen flex-col gap-2">
               <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
@@ -451,6 +494,7 @@ export default function Page({ params }: { params: { projectId: string } }) {
                         tasks={tasks}
                         editTask={toggleUpdateTaskForm}
                         deleteTask={handleDeleteTaskRequest}
+                        projectName={project.title}
                       ></TasksList>
                     )}
 
@@ -463,7 +507,12 @@ export default function Page({ params }: { params: { projectId: string } }) {
                   {activeTab === "about" &&
                     !showTaskForm &&
                     !showMemberForm && (
-                      <AboutProject project={project}></AboutProject>
+                      <AboutProject
+                        project={project}
+                        deleteProject={() => {
+                          handleDeleteProject(project);
+                        }}
+                      ></AboutProject>
                     )}
 
                   {activeTab === "overview" &&

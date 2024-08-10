@@ -46,6 +46,7 @@ export interface Task {
   assignedUserId: string;
   assignedUserName: string;
   members: UserDocument[];
+  projectName?: string;
 }
 
 interface Props {
@@ -53,10 +54,15 @@ interface Props {
   editTask: any;
   deleteTask: any;
   memberType?: string;
+  projectName: string;
 }
 
 export function TasksList(props: Props) {
   const data = props.tasks;
+
+  data.forEach((task: Task) => {
+    task.projectName = props.projectName;
+  });
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -184,6 +190,7 @@ export function TasksList(props: Props) {
         return (
           <Button
             variant="ghost"
+            className="text-center"
             // onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Status
@@ -211,7 +218,7 @@ export function TasksList(props: Props) {
       },
       cell: ({ row }) => (
         <div
-          className="flex justify-center items-center"
+          className="flex justify-center items-center w-4 h-4"
           onClick={() => props.editTask(row.original)}
         >
           <Pen />
@@ -235,7 +242,7 @@ export function TasksList(props: Props) {
       },
       cell: ({ row }) => (
         <div
-          className="flex justify-center items-center"
+          className="flex justify-center items-center w-4 h-4"
           onClick={() => props.deleteTask(row.original)}
         >
           <Trash2 />

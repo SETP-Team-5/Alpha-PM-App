@@ -17,6 +17,7 @@ import {
   ShoppingCart,
   SquareChartGantt,
   SquarePlus,
+  Trash2,
   Users,
 } from "lucide-react";
 
@@ -58,6 +59,8 @@ import {
   DialogTitle,
 } from "../components/ui/dialog";
 import { LINK_STYLE_ACTIVE, LINK_STYLE } from "@/lib/constants";
+import { LoadingSpinner } from "../components/LoadingSpinner/loadingSpinner";
+import { ScrollArea } from "../components/ui/scroll-area";
 
 export default function Dashboard() {
   const session = useSession();
@@ -73,6 +76,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("projects");
   const [showUpdateTaskForm, setShowUpdateTaskForm] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState("");
+
   const [selectedTask, setSelectedTask] = useState({});
   const [showDialogue, setShowDialogue] = useState(false);
 
@@ -99,7 +103,11 @@ export default function Dashboard() {
   }
 
   if (status === "loading") {
-    return <div>Loading....</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen w-full">
+        <LoadingSpinner />
+      </div>
+    );
   }
   // useEffect(() => {
   //   if (status === "authenticated") {
@@ -172,12 +180,14 @@ export default function Dashboard() {
               open={showUpdateTaskForm}
               onOpenChange={setShowUpdateTaskForm}
             >
-              <SheetContent>
-                <UpdateTask
-                  task={selectedTask as Task}
-                  onTaskUpdated={handleUpdatedTask}
-                  // members={members}
-                />
+              <SheetContent className="flex flex-col">
+                <div className="overflow-auto">
+                  <UpdateTask
+                    task={selectedTask as Task}
+                    onTaskUpdated={handleUpdatedTask}
+                    // members={members}
+                  />
+                </div>
               </SheetContent>
             </Sheet>
 
@@ -194,6 +204,7 @@ export default function Dashboard() {
                 </DialogHeader>
               </DialogContent>
             </Dialog>
+
             <div className="hidden border-r bg-muted/40 md:block">
               <div className="flex h-full max-h-screen flex-col gap-2">
                 <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
@@ -310,7 +321,7 @@ export default function Dashboard() {
                       <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input
                         type="search"
-                        placeholder="Search products..."
+                        placeholder="Search projects..."
                         className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
                       />
                     </div>
@@ -343,6 +354,7 @@ export default function Dashboard() {
                         editTask={toggleUpdateTaskForm}
                         deleteTask={handleDeleteTaskRequest}
                         memberType={"member"}
+                        projectName=""
                       ></TasksList>
                     )}
                     {projects.length &&
@@ -364,7 +376,7 @@ export default function Dashboard() {
                                   </CardDescription>
                                 </CardHeader>
 
-                                <CardFooter>
+                                <CardFooter className="flex justify-between">
                                   <p className="text-xs text-gray-400">
                                     {formatDate(project.startDate)} -{" "}
                                     {formatDate(project.endDate)}

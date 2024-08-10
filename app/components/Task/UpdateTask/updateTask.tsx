@@ -115,7 +115,7 @@ const UpdateTask = (props: Props) => {
 
   if (status === "authenticated") {
     return (
-      <section className="w-full flex justify-center">
+      <section className="w-full flex justify-center overflow-auto">
         <Card className="w-full">
           <CardHeader>
             <CardTitle>Update Task</CardTitle>
